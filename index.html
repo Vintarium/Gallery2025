@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виртуальная выставка</title>
+    <style>
+
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.gallery-card {
+    width: 100%; 
+    aspect-ratio: 1 / 1; 
+    overflow: hidden; 
+    position: relative;
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    background: #f0f0f0; 
+}
+
+
+
+        /* Мобильная адаптация */
+@media (max-width: 768px) {
+  .header-content h1 {
+    font-size: 2rem;
+  }
+  
+  .header-content p {
+    font-size: 1rem;
+    padding: 0 10px;
+  }
+  
+  .nav-buttons {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px;
+  }
+  
+  .nav-btn {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  .models-grid, .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 10px;
+  }
+  
+  .model-card, .gallery-card {
+    margin-bottom: 15px;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 20px auto;
+  }
+  
+  .modal-model {
+    padding-bottom: 80%; 
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    padding: 2rem 0;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .model-info h3, .gallery-info h3 {
+    font-size: 1.1rem;
+  }
+}
+
+.model-preview {
+  padding-bottom: 100%;
+  height: 0;
+  background: #eee;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.model-card, .gallery-card {
+  transition: transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.model-card:active, .gallery-card:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .modal-info {
+    padding: 15px 10px;
+  }
+  
+  .close-btn {
+    top: 5px;
+    right: 5px;
+    font-size: 24px;
+  }
+}
+
+
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Шапка */
+        header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--dark-color));
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header-content p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Кнопки навигации */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 2rem;
+        }
+        
+        .nav-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+        
+        /* Секции (изначально скрыты) */
+        .section {
+            display: none;
+            padding: 2rem 0;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            font-size: 2rem;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: var(--primary-color);
+            margin: 15px auto;
+        }
+        
+        /* Галерея 3D моделей */
+        .models-grid, .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .model-card, .gallery-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .model-card:hover, .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .model-preview {
+            position: relative;
+            padding-bottom: 100%;
+            height: 0;
+            background: #eee;
+        }
+        
+        .model-preview iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .model-info, .gallery-info {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .model-info h3, .gallery-info h3 {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 900px;
+            margin: 30px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-model {
+            position: relative;
+            padding-bottom: 60%;
+            height: 0;
+        }
+        
+        .modal-model iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .modal-image {
+            width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+        
+        .modal-info {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        /* Подвал */
+        footer {
+            background: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Главный экран -->
+    <header>
+        <div class="header-content container">
+            <h1>Виртуальная выставка учеников школы Прознание</h1>
+            <p>Добро пожаловать на нашу виртуальную выставку где представлены работы учеников курсов: " Основы 3D моделирования" и "Digital Art". Здесь вы можете ознакомиться с коллекцией 3D моделей и художественных работ.</p>
+            <div class="nav-buttons">
+                <a class="nav-btn" id="models-btn">3D Модели</a>
+                <a class="nav-btn" id="gallery-btn">Галерея картин</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Секция 3D моделей -->
+    <section id="models-section" class="section">
+        <div class="container">
+            <h2 class="section-title">3D Модели</h2>
+
+
+<div class="models-grid">
+    <!-- Модель 1: Даниил Козлов 13 лет -->
+    <div class="model-card" data-model-id="ea259b0fb6284d83af49e42216dd5b2f" data-model-title="Прознание/Coddy - Даниил Козлов 13 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/ea259b0fb6284d83af49e42216dd5b2f/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Уютные апартаменты</h3>
+            <p>Даниил Козлов, 13 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 2: Иван Зуськов 15 лет -->
+    <div class="model-card" data-model-id="7b2180b7e986411aba218c3421fe546e" data-model-title="Прознание/Coddy - Иван Зуськов 15 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/7b2180b7e986411aba218c3421fe546e/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Кухня</h3>
+            <p>Иван Зуськов, 15 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 3: Койфман Иван 12 лет -->
+    <div class="model-card" data-model-id="028e7fe563b44a048681436c469099ce" data-model-title="Прознание/Coddy - Койфман Иван 12 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/028e7fe563b44a048681436c469099ce/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Зимняя локация</h3>
+            <p>Койфман Иван, 12 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 4: Ярослав Сидык 11 лет -->
+    <div class="model-card" data-model-id="a940561cbfe04450a27c9894b971567f" data-model-title="Прознание/Coddy - Ярослав Сидык 11 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/a940561cbfe04450a27c9894b971567f/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Дом мечты</h3>
+            <p>Ярослав Сидык, 11 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 5: Туманина Екатерина 12 лет -->
+    <div class="model-card" data-model-id="9483b3986dcc4052b6742d0d627d9996" data-model-title="Прознание/Coddy - Туманина Екатерина 12 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/9483b3986dcc4052b6742d0d627d9996/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Персонаж из вселенной Minecraft с гусем в руках</h3>
+            <p>Туманина Екатерина, 12 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 6: Мила Синкевич 13 лет -->
+    <div class="model-card" data-model-id="8b18d032f3024cb3af0c4b9b69b1e32a" data-model-title="Прознание/Coddy - Мила Синкевич 13 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/8b18d032f3024cb3af0c4b9b69b1e32a/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Локация для horror игры</h3>
+            <p>Мила Синкевич, 13 лет</p>
+        </div>
+    </div>
+
+    <!-- Модель 7: Степан Пынзарь 13 лет -->
+    <div class="model-card" data-model-id="bb92efa4013e43a08f8f432600b25b84" data-model-title="Прознание/Coddy - Степан Пынзарь 13 лет" data-model-author="vintarium.education">
+        <div class="model-preview">
+            <iframe src="https://sketchfab.com/models/bb92efa4013e43a08f8f432600b25b84/embed" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+        </div>
+        <div class="model-info">
+            <h3>Домик в лесу</h3>
+            <p>Степан Пынзарь, 13 лет</p>
+        </div>
+    </div>
+</div>
+
+
+    </section>
+
+
+
+
+
+
+    <!-- Секция галереи -->
+<section id="gallery-section" class="section">
+    <div class="container">
+        <h2 class="section-title">Галерея картин</h2>
+
+        <div class="gallery-grid">
+            <!-- Картина 1 -->
+            <div class="gallery-card">
+                <img src="images/1.png" alt="Картина 1" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Девушка в синем платье</h3>
+                    <p>Жавнерович Вера</p>
+                </div>
+            </div>
+            
+            <!-- Картина 2 -->
+            <div class="gallery-card">
+                <img src="images/2.png" alt="Картина 2" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Русалка</h3>
+                    <p>Даша Качура</p>
+                </div>
+            </div>
+
+            <!-- Картина 3 -->
+            <div class="gallery-card">
+                <img src="images/3.png" alt="Картина 3" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Надежда</h3>
+                    <p>Даша Будкевич</p>
+                </div>
+            </div>
+
+            <!-- Картина 4 -->
+            <div class="gallery-card">
+                <img src="images/4.png" alt="Картина 4" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Котик и зайка</h3>
+                    <p>Ткаченко София</p>
+                </div>
+            </div>
+
+            <!-- Картина 5 -->
+            <div class="gallery-card">
+                <img src="images/5.png" alt="Картина 5" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Которыб</h3>
+                    <p>Павлович Ольга</p>
+                </div>
+            </div>
+
+            <!-- Картина 6 -->
+            <div class="gallery-card">
+                <img src="images/6.png" alt="Картина 6" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Лиса</h3>
+                    <p>Маша Свистюр</p>
+                </div>
+            </div>
+            
+            <!-- Картина 7 -->
+            <div class="gallery-card">
+                <img src="images/7.png" alt="Картина 7" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Сказочный домик</h3>
+                    <p>Мария Антонова</p>
+                </div>
+            </div>
+
+            <!-- Картина 8 -->
+            <div class="gallery-card">
+                <img src="images/8.png" alt="Картина 8" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Готиическая архитектура</h3>
+                    <p>Мария Антонова</p>
+                </div>
+            </div>
+
+            <!-- Картина 9 -->
+            <div class="gallery-card">
+                <img src="images/9.png" alt="Картина 9" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Моана</h3>
+                    <p>Инкогнито</p>
+                </div>
+            </div>
+
+            <!-- Картина 10 -->
+            <div class="gallery-card">
+                <img src="images/10.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Морской челик</h3>
+                    <p>Кузуб Варвара</p>
+                </div>
+            </div>
+
+
+             <!-- Картина 11 -->
+            <div class="gallery-card">
+                <img src="images/11.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>9 Мая</h3>
+                    <p>Ира Хаит</p>
+                </div>
+            </div>
+
+
+             <!-- Картина 12 -->
+            <div class="gallery-card">
+                <img src="images/12.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Темная ночь, только пули свистят...</h3>
+                    <p>Костикова Настя</p>
+                </div>
+            </div>
+
+             <!-- Картина 13 -->
+            <div class="gallery-card">
+                <img src="images/13.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Пейзаж</h3>
+                    <p>Герасимова Саша</p>
+                </div>
+            </div>
+
+             <!-- Картина 14 -->
+            <div class="gallery-card">
+                <img src="images/14.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Пейзаж</h3>
+                    <p>Павлович Ольга</p>
+                </div>
+            </div>
+
+
+             <!-- Картина 15 -->
+            <div class="gallery-card">
+                <img src="images/15.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Русалка</h3>
+                    <p>Пинчук Богдана</p>
+                </div>
+            </div>
+
+             <!-- Картина 16 -->
+            <div class="gallery-card">
+                <img src="images/16.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Русалка</h3>
+                    <p>Маша Свистюр</p>
+                </div>
+            </div>
+
+             <!-- Картина 17 -->
+            <div class="gallery-card">
+                <img src="images/17.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Русалочка</h3>
+                    <p>Герасимова Саша</p>
+                </div>
+            </div>
+
+             <!-- Картина 18 -->
+            <div class="gallery-card">
+                <img src="images/18.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Рыба</h3>
+                    <p>Быкова Александра</p>
+                </div>
+            </div>
+
+             <!-- Картина 19 -->
+            <div class="gallery-card">
+                <img src="images/19.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Персонажи</h3>
+                    <p>Герасимова Саша</p>
+                </div>
+            </div>
+
+             <!-- Картина 20 -->
+            <div class="gallery-card">
+                <img src="images/20.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Пейзаж</h3>
+                    <p>Пинчук Богдана</p>
+                </div>
+            </div>
+
+             <!-- Картина 21 -->
+            <div class="gallery-card">
+                <img src="images/21.png" alt="Картина 10" class="gallery-image">
+                <div class="gallery-info">
+                    <h3>Эскалотль (Аксолотль)</h3>
+                    <p>Змитроченко Яна</p>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+</section>
+
+    <!-- Модальное окно для 3D моделей -->
+    <div id="model-modal" class="modal">
+        <span class="close-btn">&times;</span>
+        <div class="modal-content">
+            <div class="modal-model">
+                <iframe id="modal-model-iframe" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+            </div>
+            <div class="modal-info">
+                <h2 id="modal-model-title"></h2>
+                <p id="modal-model-author"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для изображений -->
+    <div id="image-modal" class="modal">
+        <span class="close-btn">&times;</span>
+        <div class="modal-content">
+            <img id="modal-image" class="modal-image" src="" alt="">
+            <div class="modal-info">
+                <h2 id="modal-image-title"></h2>
+                <p id="modal-image-author"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="container">
+            <p>© 2025 Виртуальная выставка . Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Навигация между разделами
+        document.getElementById('models-btn').addEventListener('click', function() {
+            document.getElementById('models-section').classList.add('active');
+            document.getElementById('gallery-section').classList.remove('active');
+            window.scrollTo({ top: document.getElementById('models-section').offsetTop, behavior: 'smooth' });
+        });
+        
+        document.getElementById('gallery-btn').addEventListener('click', function() {
+            document.getElementById('gallery-section').classList.add('active');
+            document.getElementById('models-section').classList.remove('active');
+            window.scrollTo({ top: document.getElementById('gallery-section').offsetTop, behavior: 'smooth' });
+        });
+        
+        // По умолчанию показываем 3D модели
+        document.getElementById('models-section').classList.add('active');
+        
+        // Модальное окно для 3D моделей
+        const modelCards = document.querySelectorAll('.model-card');
+        const modelModal = document.getElementById('model-modal');
+        const modalModelIframe = document.getElementById('modal-model-iframe');
+        const modalModelTitle = document.getElementById('modal-model-title');
+        const modalModelAuthor = document.getElementById('modal-model-author');
+        const closeBtns = document.querySelectorAll('.close-btn');
+        
+        modelCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const modelId = this.getAttribute('data-model-id');
+                const title = this.getAttribute('data-model-title');
+                const author = this.getAttribute('data-model-author');
+                
+                modalModelIframe.src = `https://sketchfab.com/models/${modelId}/embed`;
+                modalModelTitle.textContent = title;
+                modalModelAuthor.textContent = author;
+                modelModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        // Модальное окно для изображений
+        const galleryCards = document.querySelectorAll('.gallery-card');
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalImageTitle = document.getElementById('modal-image-title');
+        const modalImageAuthor = document.getElementById('modal-image-author');
+        
+        galleryCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const imgSrc = this.querySelector('img').src;
+                const title = this.querySelector('h3').textContent;
+                const author = this.querySelector('p').textContent;
+                
+                modalImage.src = imgSrc;
+                modalImage.alt = title;
+                modalImageTitle.textContent = title;
+                modalImageAuthor.textContent = author;
+                imageModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        // Закрытие модальных окон
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                modelModal.style.display = 'none';
+                imageModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                // Останавливаем воспроизведение 3D модели при закрытии
+                modalModelIframe.src = '';
+            });
+        });
+        
+        // Закрытие при клике вне модального окна
+        window.addEventListener('click', function(event) {
+            if (event.target === modelModal) {
+                modelModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                modalModelIframe.src = '';
+            }
+            if (event.target === imageModal) {
+                imageModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
